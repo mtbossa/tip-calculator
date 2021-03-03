@@ -1,6 +1,10 @@
 package com.example.tiptime
 
+import android.content.Context
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tiptime.databinding.ActivityMainBinding
@@ -31,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         displayTip(0.0)
 
         binding.calculateButton.setOnClickListener { calculateTip() }
+
+        binding.costOfServiceEditText.setOnKeyListener { view, keyCode, _ ->
+            handleKeyEvent(view, keyCode)
+        }
+
     }
 
     private fun calculateTip() {
@@ -39,7 +48,7 @@ class MainActivity : AppCompatActivity() {
          *  Need .toString() because the text attribute of an EditText is an Editable (not String)
          *  because it represents text that can be changed.
          */
-        val stringInTextField: String = binding.costOfService.text.toString()
+        val stringInTextField: String = binding.costOfServiceEditText.text.toString()
 
         /**
          * Creates variable cost: Double? to store the cost as double
@@ -49,14 +58,16 @@ class MainActivity : AppCompatActivity() {
          */
         val cost = stringInTextField.toDoubleOrNull()
         if (cost == null || cost == 0.0) {
-            val toast = Toast.makeText(applicationContext, "Please, insert a valid value", Toast
-                    .LENGTH_SHORT)
-                    .show()
+            val toast = Toast.makeText(
+                applicationContext, "Please, insert a valid value", Toast
+                    .LENGTH_SHORT
+            )
+                .show()
             displayTip(0.0)
             return
         } else if (cost > 100000) {
             val toast = Toast.makeText(applicationContext, "Cost too high", Toast.LENGTH_SHORT)
-                    .show()
+                .show()
             displayTip(0.0)
             return
         }
@@ -110,5 +121,16 @@ class MainActivity : AppCompatActivity() {
          */
         binding.tipResult.text = getString(R.string.tip_amount, formattedTip)
 
+    }
+
+    private fun handleKeyEvent(view: View, keyCode: Int): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+            // Hide the keyboard
+            val inputMethodManager =
+                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+            return true
+        }
+        return false
     }
 }
